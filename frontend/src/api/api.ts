@@ -8,46 +8,82 @@ import type {
 
 const API_BASE_URL = "http://localhost:8000";
 
-export async function listBooks(_params?: {
+export async function listBooks(params?: {
   q?: string;
   genre?: Genre | "All";
 }): Promise<Book[]> {
-  void _params;
-  void API_BASE_URL;
-  // TODO: Call GET /books with optional q/genre query params.
-  throw new Error("TODO: implement listBooks in src/api/api.ts");
+  // Build the "?q=...&genre=..." part of the address.
+  const query = new URLSearchParams();
+  if (params && params.q) {
+    query.set("q", params.q);
+  }
+  if (params && params.genre && params.genre !== "All") {
+    query.set("genre", params.genre);
+  }
+
+  let url = `${API_BASE_URL}/books`;
+  if (query.toString() !== "") {
+    url = `${url}?${query.toString()}`;
+  }
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error("Could not load books");
+  }
+  return response.json();
 }
 
-export async function getBook(_bookId: number): Promise<Book> {
-  void _bookId;
-  void API_BASE_URL;
-  // TODO: Call GET /books/{id}.
-  throw new Error("TODO: implement getBook in src/api/api.ts");
+export async function getBook(bookId: number): Promise<Book> {
+  const response = await fetch(`${API_BASE_URL}/books/${bookId}`);
+  if (!response.ok) {
+    throw new Error("Could not load that book");
+  }
+  return response.json();
 }
 
 export async function createBook(
-  _payload: BookFormValues,
+  payload: BookFormValues,
 ): Promise<Book> {
-  void _payload;
-  void API_BASE_URL;
-  // TODO: Call POST /books.
-  throw new Error("TODO: implement createBook in src/api/api.ts");
+  const response = await fetch(`${API_BASE_URL}/books`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error("Could not create the book");
+  }
+  return response.json();
 }
 
 export async function listBookCheckouts(
-  _bookId: number,
+  bookId: number,
 ): Promise<Checkout[]> {
-  void _bookId;
-  void API_BASE_URL;
-  // TODO: Call GET /books/{id}/checkouts.
-  throw new Error("TODO: implement listBookCheckouts in src/api/api.ts");
+  const response = await fetch(`${API_BASE_URL}/books/${bookId}/checkouts`);
+  if (!response.ok) {
+    throw new Error("could not load checkouts")
+  }
+
+  return response.json();
 }
 
 export async function createCheckout(
-  _payload: CheckoutFormValues,
+  payload: CheckoutFormValues,
 ): Promise<Checkout> {
-  void _payload;
-  void API_BASE_URL;
-  // TODO: Call POST /checkouts.
-  throw new Error("TODO: implement createCheckout in src/api/api.ts");
+  // The dropdown gives us book_id as text, but the API wants a number.
+  const body = {
+    patron_name: payload.patron_name,
+    book_id: Number(payload.book_id),
+    date: payload.date,
+    notes: payload.notes,
+  };
+
+  const response = await fetch(`${API_BASE_URL}/checkouts`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    throw new Error("Could not create the checkout");
+  }
+  return response.json();
 }
