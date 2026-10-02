@@ -5,6 +5,7 @@ import BookDetail from './components/BookDetail'
 import BookForm from './components/BookForm'
 import BookList from './components/BookList'
 import { GENRES, type Genre, type Checkout, type CheckoutFormValues, type Book, type BookFormValues } from './types'
+import { createBook, createCheckout, getBook, listBookCheckouts, listBooks } from './api/api'
 
 const initialBookForm: BookFormValues = {
   title: '',
@@ -33,47 +34,63 @@ function App() {
   const [error, setError] = useState<string | null>(null)
 
   async function handleLoadBooks() {
-    void search
-    void genreFilter
-    void setBooks
-    // TODO: Implement book list loading using src/api/api.ts.
-    setError('TODO: implement handleLoadBooks in App.tsx')
+    try {
+      const results = await listBooks({ q: search, genre: genreFilter })
+      setBooks(results)
+      setError(null)
+    } catch {
+      setError('Could not load books.')
+    }
   }
 
   async function handleSelectBook(bookId: number) {
-    void bookId
-    void setSelectedBook
-    void setBookCheckouts
-    void setCheckoutForm
-    // TODO: Implement selected book + checkouts fetch using src/api/api.ts.
-    setError('TODO: implement handleSelectBook in App.tsx')
+    try {
+      const book = await getBook(bookId)
+      const checkouts = await listBookCheckouts(bookId)
+      setSelectedBook(book)
+      setBookCheckouts(checkouts)
+      setCheckoutForm({ ...checkoutForm, book_id: String(bookId) })
+      setError(null)
+    } 
+    catch {
+      setError('couldnt load that book')
+    }
   }
-
+  
   function handleBookFormChange(next: BookFormValues) {
-    void next
-    // TODO: Implement book form state handling.
-    setError('TODO: implement book form state updates in App.tsx')
+    setBookForm(next)
   }
-
+  
   function handleCheckoutFormChange(next: CheckoutFormValues) {
-    void next
-    // TODO: Implement checkout form state handling.
-    setError('TODO: implement checkout form state updates in App.tsx')
+    setCheckoutForm(next)
   }
 
   async function handleCreateBook() {
-    void bookForm
-    void setBookForm
-    // TODO: Implement book creation flow using src/api/api.ts.
-    setError('TODO: implement handleCreateBook in App.tsx')
+    try {
+      await createBook(bookForm)
+      setBookForm(initialBookForm)
+      setError(null)
+      await handleLoadBooks()
+    } 
+    catch {
+      setError('couldnt create book')
+    }
   }
 
   async function handleCreateCheckout() {
-    void checkoutForm
-    void selectedBook
-    void setCheckoutForm
-    // TODO: Implement checkout creation flow using src/api/api.ts.
-    setError('TODO: implement handleCreateCheckout in App.tsx')
+    try {
+      await createCheckout(checkoutForm)
+      setCheckoutForm({ ...initialCheckoutForm, book_id: checkoutForm.book_id })
+      setError(null)
+
+    if (selectedBook) {
+      const checkouts = await listBookCheckouts(selectedBook.id)
+      setBookCheckouts(checkouts)
+      }
+    } 
+    catch {
+      setError('couldnt create that checkout')
+    }
   }
 
   return (
