@@ -47,7 +47,7 @@ function BookList({
         </select>
       </div>
 
-      {/* TODO: Add empty-state messaging when no books match the current search/filter. */}
+      {books.length === 0 ? (<p className = "empty">No Books match the search and filter</p>) : null}
       <ul className="list">
         {books.map((book) => (
           <li key={book.id} className="list-item">

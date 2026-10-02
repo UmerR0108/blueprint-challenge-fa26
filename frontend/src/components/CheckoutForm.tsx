@@ -1,4 +1,5 @@
 import type { CheckoutFormValues, Book } from '../types'
+import { useState } from 'react'
 
 type CheckoutFormProps = {
   values: CheckoutFormValues
@@ -8,9 +9,19 @@ type CheckoutFormProps = {
 }
 
 function CheckoutForm({ values, books, onChange, onSubmit }: CheckoutFormProps) {
-  // TODO: Add validation for required fields before submit.
+  const [message, setMessage] = useState<string | null>(null)
   function update<K extends keyof CheckoutFormValues>(key: K, value: CheckoutFormValues[K]) {
+    setMessage(null)
     onChange({ ...values, [key]: value })
+  }
+  function handleSubmit() {
+    if ( values.patron_name === '' || values.book_id === '' || values.date === '' || values.notes === '') 
+    {
+      setMessage('Please fill in every field before recording a checkout.')
+      return
+    }
+    setMessage('Checkout recorded.')
+    onSubmit()
   }
 
   return (
@@ -18,7 +29,6 @@ function CheckoutForm({ values, books, onChange, onSubmit }: CheckoutFormProps) 
       <h2>Create Checkout</h2>
 
       <div className="form-grid">
-        {/* TODO: Prefill selected book context when opened from book details. */}
         <label htmlFor="checkout-patron-name">Patron Name</label>
         <input
           id="checkout-patron-name"
@@ -57,7 +67,7 @@ function CheckoutForm({ values, books, onChange, onSubmit }: CheckoutFormProps) 
       </div>
 
       <button onClick={onSubmit}>Create Checkout</button>
-      {/* TODO: Show submit state and confirmation after successful creation. */}
+      {message ? <p className="form-message">{message}</p> : null}
     </section>
   )
 }

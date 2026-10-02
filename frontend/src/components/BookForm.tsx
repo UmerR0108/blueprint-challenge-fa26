@@ -1,4 +1,6 @@
 import type { BookFormValues, Genre } from '../types'
+import { useState } from 'react'
+
 
 type BookFormProps = {
   values: BookFormValues
@@ -8,11 +10,26 @@ type BookFormProps = {
 }
 
 function BookForm({ values, genres, onChange, onSubmit }: BookFormProps) {
-  // TODO: Add validation for required fields before submit.
+  const [message, setMessage] = useState<string | null>(null)
   function update<K extends keyof BookFormValues>(key: K, value: BookFormValues[K]) {
+    setMessage(null)
     onChange({ ...values, [key]: value })
   }
+  function handleSubmit() {
+    if (
+      values.title === '' ||
+      values.description === '' ||
+      values.author === '' ||
+      values.publisher_email === '' ||
+      values.shelf_location === ''
+    ) {
+      setMessage('Please fill in every field before creating a book.')
+      return
+    }
 
+    setMessage('Book created.')
+    onSubmit()
+  }
   return (
     <section className="card">
       <h2>Create Book</h2>
@@ -69,7 +86,7 @@ function BookForm({ values, genres, onChange, onSubmit }: BookFormProps) {
       </div>
 
       <button onClick={onSubmit}>Create Book</button>
-      {/* TODO: Show submit state and confirmation after successful creation. */}
+      {message ? <p className = "form-message">{message}</p> : null}
     </section>
   )
 }
